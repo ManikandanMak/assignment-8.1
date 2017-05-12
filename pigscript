@@ -1,0 +1,16 @@
+a = load '/home/acadgild/patrol.txt' using PigStorage(',') AS (id:chararray,Dname:chararray,B_rate:chararray, S_rate:chararray,volume_in:int,volume_out:int,year:int);
+b = group a by Dname;
+c = foreach b generate group as dist,SUM(a.volume_out) as volume;
+dump c;
+d = order a by volume_out DESC;
+e = LIMIT d 10;
+f = foreach e generate id,volume_out;
+dump f;
+g = foreach e generate id,year;
+dump g;
+h = foreach e generate id,(double)REPLACE(S_rate,'([$])','') as price ;
+i = group h all;
+j = FOREACH i GENERATE FLATTEN(MIN(h.price)) as price1 ;
+k = FILTER h BY price == j.price1 ;
+l = FOREACH k GENERATE id;
+dump l;
